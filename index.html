@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Para meu Amor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        /* RESET E ESTRUTURA */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            overflow: hidden;
+            /* Gradiente de fundo rosa bem suave */
+            background: linear-gradient(180deg, #ffe6ea 0%, #ffc4d6 100%);
+            font-family: 'Nunito', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* CANVAS (Fundo atrás de tudo) */
+        #heart-canvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; 
+            pointer-events: none; 
+        }
+
+        /* --- ESTILO KAWAII ULTRA-TRANSPARENTE --- */
+        .kawaii-box {
+            /* Fundo MUITO mais transparente (0.6) */
+            background: rgba(255, 255, 255, 0.6);
+            /* Efeito de vidro fosco forte para ler o texto */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            /* Borda pontilhada rosa */
+            border: 4px dashed #ff9aa2;
+            /* Cantos super redondos */
+            border-radius: 40px;
+            /* Sombra rosa brilhante */
+            box-shadow: 0 20px 40px rgba(255, 105, 180, 0.35);
+            text-align: center;
+            max-width: 90%;
+        }
+
+        /* CARD PRINCIPAL (Pergunta) */
+        .card {
+            position: relative;
+            z-index: 10;
+            padding: 40px;
+            width: 440px;
+        }
+
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            color: #ff5c8d;
+            font-size: 2.4rem;
+            margin-bottom: 20px;
+            /* Contorno branco fofo no texto */
+            text-shadow: 3px 3px 0px #fff, -3px -3px 0px #fff, 3px -3px 0px #fff, -3px 3px 0px #fff;
+        }
+
+        p { 
+            color: #884a5a; 
+            font-size: 1.3rem; 
+            line-height: 1.6;
+            font-weight: 800;
+        }
+
+        /* BOTÕES */
+        .buttons {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            height: 80px;
+        }
+
+        button {
+            border: none;
+            padding: 18px 45px;
+            font-size: 1.4rem;
+            border-radius: 60px;
+            font-family: 'Fredoka One', cursive;
+            cursor: pointer;
+            transition: transform 0.2s;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-sim {
+            background: #ff5c8d;
+            color: white;
+            box-shadow: 0 8px 0px #d44572;
+            z-index: 20;
+            border: 3px solid white; /* Borda branca fofa */
+        }
+        .btn-sim:active { 
+            transform: translateY(8px); 
+            box-shadow: 0 0px 0px #d44572;
+        }
+
+        .btn-nao {
+            background: #fff;
+            color: #ff5c8d;
+            border: 4px solid #ff5c8d;
+            z-index: 20;
+            position: relative;
+            box-shadow: 0 8px 0px #ffd1dc;
+        }
+
+        /* TELA FINAL (Carta) */
+        #final-screen {
+            display: none;
+            z-index: 15;
+            padding: 30px;
+            width: 92%;
+            max-height: 88vh; 
+            overflow-y: auto; 
+            scroll-behavior: smooth;
+        }
+
+        #final-screen::-webkit-scrollbar { width: 12px; }
+        #final-screen::-webkit-scrollbar-track { background: rgba(255,255,255,0.3); border-radius: 10px;}
+        #final-screen::-webkit-scrollbar-thumb { background-color: #ff9aa2; border-radius: 10px; border: 3px solid rgba(255,255,255,0.5); }
+
+        .typing {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            color: #b83b69; /* Cor do texto um pouco mais escura para contraste */
+            font-size: 1.2rem;
+            white-space: pre-wrap;
+            text-align: left;
+            padding: 15px;
+            line-height: 1.8;
+            padding-bottom: 80px;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8); /* Ajuda a ler no fundo transparente */
+        }
+
+        /* OVERLAY INICIAL */
+        #start-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffe6ea;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        #start-overlay h2 {
+            font-family: 'Fredoka One', cursive;
+            color: #ff5c8d;
+            animation: pulse 0.8s infinite alternate;
+            padding: 20px;
+            text-align: center;
+            font-size: 2.2rem;
+            text-shadow: 3px 3px 0px #fff;
+        }
+
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+    </style>
+</head>
+<body>
+
+    <audio id="music" loop>
+        <source src="anjos.mp3" type="audio/mp3">
+    </audio>
+
+    <canvas id="heart-canvas"></canvas>
+
+    <div id="start-overlay" onclick="startExperience()" ontouchend="startExperience()">
+        <h2>Toque para começar a surpresa... 💖✨</h2>
+    </div>
+
+    <div class="card kawaii-box" id="question-card">
+        <h1>Quer namorar comigo?</h1>
+        <p>Dia 25 é o pedido oficial! Se prepara pelo textinho! 💖</p>
+        <div class="buttons">
+            <button class="btn-sim" onclick="sheSaidYes()">SIM</button>
+            <button class="btn-nao" id="btn-nao">NÃO</button>
+        </div>
+    </div>
+
+    <div id="final-screen" class="kawaii-box">
+        <h1>Eu te amo! 💖</h1>
+        <br>
+        <div class="typing" id="message-text"></div>
+        <p style="margin-top: 20px; font-size: 4rem;">💍✨🌸</p>
+    </div>
+
+    <script>
+        // --- CONFIGURAÇÃO DO CANVAS ULTRA KAWAII ---
+        const canvas = document.getElementById('heart-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let hearts = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Heart {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * height;
+            }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = height + Math.random() * 100;
+                this.size = Math.random() * 25 + 15; 
+                this.speedY = Math.random() * 1.5 + 0.5;
+                this.speedX = Math.random() * 2 - 1;
+                // PALETA APENAS TONS DE ROSA
+                const colors = ["#FFC0CB", "#FFB6C1", "#FF69B4", "#FF1493", "#DB7093", "#FFC4D6", "#ff9aa2", "#ffdde1", "#ff5c8d"];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.opacity = Math.random() * 0.6 + 0.4; // Mais visíveis
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += Math.sin(this.y * 0.01) * 0.5;
+                if (this.y < -50) this.reset();
+            }
+            draw() {
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                let topCurveHeight = this.size * 0.3;
+                ctx.moveTo(this.x, this.y + topCurveHeight);
+                ctx.bezierCurveTo(this.x, this.y, this.x - this.size / 2, this.y, this.x - this.size / 2, this.y + topCurveHeight);
+                ctx.bezierCurveTo(this.x - this.size / 2, this.y + (this.size + topCurveHeight) / 2, this.x, this.y + (this.size + topCurveHeight) / 2, this.x, this.y + this.size);
+                ctx.bezierCurveTo(this.x, this.y + (this.size + topCurveHeight) / 2, this.x + this.size / 2, this.y + (this.size + topCurveHeight) / 2, this.x + this.size / 2, this.y + topCurveHeight);
+                ctx.bezierCurveTo(this.x + this.size / 2, this.y, this.x, this.y, this.x, this.y + topCurveHeight);
+                ctx.fill();
+                ctx.closePath();
+                // Brilho Kawaii
+                ctx.globalAlpha = 0.8;
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(this.x - this.size / 4, this.y + topCurveHeight / 2, this.size / 7, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.closePath();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function initHearts() {
+            // AUMENTADO PARA 100 CORAÇÕES!
+            for (let i = 0; i < 100; i++) hearts.push(new Heart());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            hearts.forEach(heart => { heart.update(); heart.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        initHearts();
+        animate();
+
+        // --- LÓGICA DO SITE ---
+
+        function startExperience() {
+            const overlay = document.getElementById('start-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => { overlay.style.display = 'none'; }, 500);
+        }
+
+        const btnNao = document.getElementById('btn-nao');
+
+        function moveButton(e) {
+            if(e) e.preventDefault(); 
+            btnNao.style.position = 'fixed'; 
+            const x = Math.random() * (window.innerWidth - btnNao.offsetWidth - 40) + 20;
+            const y = Math.random() * (window.innerHeight - btnNao.offsetHeight - 40) + 20;
+            btnNao.style.left = `${x}px`;
+            btnNao.style.top = `${y}px`;
+        }
+
+        btnNao.addEventListener('mouseover', moveButton);
+        btnNao.addEventListener('touchstart', moveButton);
+        btnNao.addEventListener('click', moveButton);
+
+        function sheSaidYes() {
+            document.getElementById('question-card').style.display = 'none';
+            document.getElementById('final-screen').style.display = 'block';
+            
+            document.getElementById('music').play().catch(e => console.log("Erro ao tocar musica:", e));
+
+            // Explosão extra de corações rosa choque
+            for(let i=0; i<50; i++) hearts.push(new Heart());
+            hearts.forEach(h => { h.speedY += 3; h.color = "#ff1493"; h.opacity = 1; });
+
+            const text = `Delani… meu amor, minha princesinha…
+
+Desde o momento em que você apareceu na minha vida, tudo ficou mais leve, mais bonito, mais cheio de sentido. Tudo começou tão simples… um follow no TikTok, umas partidas no Roblox… e de repente, eu me vi querendo você por perto todos os dias.
+
+As nossas calls, as nossas conversas, o jeito doce que você fala comigo… tudo isso me ganhou sem esforço nenhum. Você não foi entrando no meu coração devagar… você simplesmente chegou e tomou conta dele. E a verdade é que eu nem quis impedir. Eu amei cada segundo disso.
+
+Mesmo com a distância entre São Paulo e Amazonas, você é a pessoa que eu mais sinto perto. A tua voz, teu carinho, a forma como você me trata… isso aquece minha alma de um jeito que eu nunca senti antes. O amor que eu tenho por você, Delani, é tão grande, tão verdadeiro, tão forte, que nenhum quilômetro do mundo seria capaz de diminuir.
+
+Você é a minha princesinha.
+A menina que eu quero cuidar, proteger, mimar, amar… mesmo de longe.
+A pessoa que virou meu aconchego. Meu sorriso fácil. Meu sentimento mais bonito.
+
+E hoje, com todo o amor do mundo, com o coração batendo rápido só de pensar em você, eu quero te perguntar…
+
+Delani… você aceita namorar comigo?
+
+Aceita continuar caminhando comigo, rindo comigo, vivendo comigo, crescendo comigo?
+Aceita deixar eu te amar cada vez mais?
+Aceita ser minha, do jeitinho doce, sincero e intenso que já é?
+
+Sei que nós já namoramos desde o dia 06/12. Mas vamos oficializar nessa data especial, dia 25/12. Você foi um presente de Deus em minha vida. E sou muito grato a isso!
+
+Eu te amo muito, muito, muito mais do que qualquer palavra consegue explicar.
+E se você disser sim… prometo te fazer feliz todos os dias, mesmo que seja pela tela, pela call ou pelo som da nossa risada juntos.
+
+Algum dia vou fazer você estar aqui comigo, vamos brincar, assistir, comer, transar muito e viver feliz com você ao meu ladinho. 
+Eu quero construir uma vida com você. E eu quero fazer valer a pena. Irei fazer o melhor bem possível para nós dois! 💖💖
+
+Porque você… é o meu amor.
+E sempre vai ser.
+
+Um trecho da música que lembro de você:
+
+"Eu nunca te beijei, mas eu sempre sonhei
+Com esse amor
+Sinto como os anjos, voando e desejando
+O seu amor"
+
+Obrigado por ser meu tudo, vou cuidar de você, te dar todo amor e carinho.
+Eu te amo, e prometo te amar cada vez mais 💖💖`;
+
+            let i = 0;
+            
+            function type() {
+                if (i < text.length) {
+                    document.getElementById("message-text").innerHTML += text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
+                    i++;
+                    setTimeout(type, 100); 
+                }
+            }
+            type();
+        }
+    </script>
+</body>
+</html>
